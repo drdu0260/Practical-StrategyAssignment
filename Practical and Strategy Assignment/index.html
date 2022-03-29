@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <title>Full Stack Demo Site</title>
+        <!-- Install Optimizely SDK -->
+        <script src="https://unpkg.com/@optimizely/optimizely-sdk/dist/optimizely.browser.umd.min.js"></script>
+        <!-- Add your datafile using your SDK key so you can later instantiate an  Optimizely client -->
+        <script src="https://cdn.optimizely.com/datafiles/3BM4YyFi64nqsGvZhfsP2.json/tag.js"></script>
+    </head>
+
+    <body>
+        <h1>Welcome to my eCommerce Website</h1>
+        <p id="id_prompt">User ID = </p>
+        <p id="flag_status">Flag Status = </p>
+        <img src="images/shirt.png" alt="picture of a shirt for sale" width="400" height="auto">
+
+        <p id="price_prompt">Price = </p>
+        <button type="button" id="checkout_button">Click here to buy this shirt!</button> 
+    </body>
+
+    <script>
+        var optimizelyClientInstance = window.optimizelySdk.createInstance({
+            datafile: window.optimizelyDatafile
+        });
+
+        // make a random user ID
+        function makeid() {
+            var userId = "";
+            userId = String(Math.random());
+            return userId;
+        };
+        var userId = makeid();
+        document.getElementById("id_prompt").innerHTML += userId;
+
+        //check if feature is enabled for the user
+        var enabled = optimizelyClientInstance.isFeatureEnabled('button_flag', userId);
+
+        //execute code if enabled/disabled
+        if (enabled) {
+            document.getElementById("flag_status").innerHTML +="enabled";
+            document.getElementById("price_prompt").innerHTML +='$'+ optimizelyClientInstance.getFeatureVariable('button_flag','price',userId);
+        } else {
+            document.getElementById("flag_status").innerHTML +="disabled";
+            document.getElementById("price_prompt").innerHTML += "Not for Sale"
+        }
+
+        //track purchase event for every button click
+        document.getElementById("checkout_button").addEventListener('click', function(e){
+            optimizelyClientInstance.track('purchase', userId);
+            console.log("Optimizely tracked a purchase event to show in experiment results")
+        })
+
+    </script>
+</html>
